@@ -3,12 +3,15 @@ import database from "/infra/database.js";
 async function status(request, response) {
   const updateAt = new Date().toISOString(); // Current timestamp in ISO 8601 format
 
+  // Get the database server version
   const dbVersionResult = await database.query("SHOW server_version;"); // Example result: { rows: [ { server_version: '16.0' } ], ... }
   const dbVersionValue = dbVersionResult.rows[0].server_version; // "16.0"
 
+  // Get the maximum allowed connections to the database
   const dbMaxConnectionsResult = await database.query("SHOW max_connections;"); // Example result: { rows: [ { max_connections: '100' } ], ... }
   const dbMaxConnectionsValue = dbMaxConnectionsResult.rows[0].max_connections; // "100"
 
+  // Get the number of opened connections to the current database
   const dbName = process.env.POSTGRES_DB;
   const dbOpenedConnectionsResult = await database.query({
     text: "SELECT count(*)::int FROM pg_stat_activity WHERE datname = $1",
